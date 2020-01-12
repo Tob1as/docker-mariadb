@@ -27,7 +27,7 @@ The intent is also to maintain high compatibility with MySQL, ensuring a "drop-i
 #### Docker-Compose
 
 ```
-# Use root/passw0rd as user/password credentials
+# Use root/my-secret-pw as user/password credentials
 version: '2.4'
 services:
   mariadb:
@@ -38,11 +38,11 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
-       MYSQL_ROOT_PASSWORD: passw0rd
+       MYSQL_ROOT_PASSWORD: my-secret-pw
        #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
        #MYSQL_DATABASE: user
        #MYSQL_USER: user
-       #MYSQL_PASSWORD: passw0rd
+       #MYSQL_PASSWORD: my-secret-pw
     restart: unless-stopped
     ports:
       - 3306:3306
@@ -53,3 +53,7 @@ services:
       timeout: 5s
       retries: 5
 ```
+
+### This Image on
+* [DockerHub](https://hub.docker.com/r/tobi312/rpi-mariadb/)
+* [GitHub](https://github.com/Tob1asDocker/rpi-mariadb)
