@@ -1,7 +1,7 @@
 # MariaDB on Raspberry Pi / ARM
 
 ### Supported tags and respective `Dockerfile` links
--	[`10.3`, `latest` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/stretch.armhf.10_3.Dockerfile) (on Debian 10 Buster)
+-	[`10.3`, `latest` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/buster.armhf.10_3.Dockerfile) (on Debian 10 Buster)
 -	[`10.1` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/stretch.armhf.10_1.Dockerfile) (on Debian 9 Stretch)
 
 # What is MariaDB?
