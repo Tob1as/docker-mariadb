@@ -2,7 +2,7 @@ FROM arm32v7/debian:buster-slim
 
 LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
 	org.opencontainers.image.title="MariaDB" \
-	org.opencontainers.image.description="Debian 9 Stretch with MariaDB 10.3 on arm arch" \
+	org.opencontainers.image.description="Debian 10 Buster with MariaDB 10.3 on arm arch" \
 	org.opencontainers.image.licenses="GPL-2.0" \
 	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
 	org.opencontainers.image.source="https://github.com/Tob1asDocker/rpi-mariadb"
