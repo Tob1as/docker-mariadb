@@ -40,9 +40,9 @@ services:
     environment:
        MYSQL_ROOT_PASSWORD: passw0rd
        #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-       MYSQL_DATABASE: user
-       MYSQL_USER: user
-       MYSQL_PASSWORD: passw0rd
+       #MYSQL_DATABASE: user
+       #MYSQL_USER: user
+       #MYSQL_PASSWORD: passw0rd
     restart: unless-stopped
     ports:
       - 3306:3306
