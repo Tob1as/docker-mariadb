@@ -1,9 +1,12 @@
 # MariaDB on Raspberry Pi / ARM
 
 ### Supported tags and respective `Dockerfile` links
--	[`10.3-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_3.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.10/main/armhf/mariadb)) (experimental image)
 -	[`10.3`, `latest` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/buster.armhf.10_3.Dockerfile) (on Debian 10 Buster)
 -	[`10.1` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/stretch.armhf.10_1.Dockerfile) (on Debian 9 Stretch)
+
+-	[`10.4-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_4.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.11/main/armhf/mariadb)) (experimental image)
+-	[`10.3-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_3.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.10/main/armhf/mariadb)) (experimental image)
+-	[`10.2-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_2.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.8/main/armhf/mariadb)) (experimental image, based on [balenalib/armv7hf-alpine](https://hub.docker.com/r/balenalib/armv7hf-alpine))
 
 # What is MariaDB?
 
@@ -22,7 +25,7 @@ The intent is also to maintain high compatibility with MySQL, ensuring a "drop-i
 
 ### How to use these images:
 
-* ``` $ docker run --name some-mariadb -v $(pwd)/mariadb:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d tobi312/rpi-mariadb:TAG ```
+* ``` $ docker run --name some-mariadb -v $(pwd)/mariadb:/var/lib/mysql -p 3306:3306  -e MYSQL_ROOT_PASSWORD=my-secret-pw -d tobi312/rpi-mariadb:TAG ```
 * more see official [MariaDB](https://hub.docker.com/_/mariadb)-Image
 
 #### Docker-Compose

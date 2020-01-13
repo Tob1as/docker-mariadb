@@ -1,4 +1,4 @@
-FROM arm32v7/alpine:3.8
+FROM balenalib/armv7hf-alpine:3.8
 
 LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
 	org.opencontainers.image.title="MariaDB" \
