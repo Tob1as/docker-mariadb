@@ -27,7 +27,7 @@ The intent is also to maintain high compatibility with MySQL, ensuring a "drop-i
 
 #### Docker-Compose
 
-```
+```yaml
 # Use root/my-secret-pw as user/password credentials
 version: '2.4'
 services:
