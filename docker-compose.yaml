@@ -1,0 +1,25 @@
+# Use root/my-secret-pw as user/password credentials
+version: '2.4'
+services:
+  mariadb:
+    image: tobi312/rpi-mariadb:TAG
+    container_name: mariadb
+    volumes:
+      - ./mariadb:/var/lib/mysql
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+       MYSQL_ROOT_PASSWORD: my-secret-pw
+       #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+       MYSQL_DATABASE: user
+       MYSQL_USER: user
+       MYSQL_PASSWORD: my-secret-pw
+    restart: unless-stopped
+    ports:
+      - 3306:3306
+    healthcheck:
+      test:  mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || exit 1
+      #start_period: 60s
+      interval: 30s
+      timeout: 5s
+      retries: 5
