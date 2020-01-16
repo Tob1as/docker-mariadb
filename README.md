@@ -4,10 +4,13 @@
 -	[`10.3`, `latest` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/buster.armhf.10_3.Dockerfile) (on Debian 10 Buster)
 -	[`10.1` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/stretch.armhf.10_1.Dockerfile) (on Debian 9 Stretch)
 
--	[`10.4-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_4.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.11/main/armhf/mariadb)) (experimental image)
--	[`10.3-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_3.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.10/main/armhf/mariadb)) (experimental image)
--	[`10.2-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_2.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.8/main/armhf/mariadb)) (experimental image) (based on [balenalib](https://hub.docker.com/r/balenalib/armv7hf-alpine))
--	[`10.1-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_1.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.7/main/armhf/mariadb)) (experimental image) (based on [balenalib](https://hub.docker.com/r/balenalib/armv7hf-alpine))
+-	[`10.3-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.armhf.10_3.Dockerfile) (on [Ubuntu](https://packages.ubuntu.com/search?lang=de&arch=armhf&searchon=names&keywords=mariadb-server) 19.10 Eoan Ermine)
+-	[`10.1-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.armhf.10_1.Dockerfile) (on [Ubuntu](https://packages.ubuntu.com/search?lang=de&arch=armhf&searchon=names&keywords=mariadb-server) 18.04 LTS Bionic Beaver)
+
+-	[`10.4-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_4.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.11/main/armhf/mariadb) 3.11)
+-	[`10.3-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_3.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.10/main/armhf/mariadb) 3.10)
+-	[`10.2-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_2.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.8/main/armhf/mariadb) 3.8) *
+-	[`10.1-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_1.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.7/main/armhf/mariadb) 3.7) *
 
 # What is MariaDB?
 
@@ -20,9 +23,10 @@ The intent is also to maintain high compatibility with MySQL, ensuring a "drop-i
 ![logo](https://raw.githubusercontent.com/docker-library/docs/master/mariadb/logo.png)
 
 ### About these images:
-* a port of the official [MariaDB](https://hub.docker.com/_/mariadb)-Image
-* based on official Images: [arm32v7/debian](https://hub.docker.com/r/arm32v7/debian/) and [arm32v7/alpine](https://hub.docker.com/r/arm32v7/alpine/)
-* build on Docker Hub with Autobuild, for example and more details see in this [repository](https://github.com/Tob1asDocker/dockerhubhooksexample)
+* a port of the official [MariaDB](https://hub.docker.com/_/mariadb)-Image.
+* based on official Images: [arm32v7/debian](https://hub.docker.com/r/arm32v7/debian/), [arm32v7/alpine](https://hub.docker.com/r/arm32v7/alpine/) or [arm32v7/ubuntu](https://hub.docker.com/r/arm32v7/ubuntu/).  
+(Alpine-Images marked with a *-sign are based on [balenalib/armv7hf-alpine](https://hub.docker.com/r/balenalib/armv7hf-alpine).)
+* build on Docker Hub with Autobuild, for example and more details see in this [repository](https://github.com/Tob1asDocker/dockerhubhooksexample).
 
 ### How to use these images:
 
@@ -40,8 +44,8 @@ services:
     #container_name: mariadb
     volumes:
       - ./mariadb:/var/lib/mysql
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      #- /etc/timezone:/etc/timezone:ro
+      #- /etc/localtime:/etc/localtime:ro
     environment:
        MYSQL_ROOT_PASSWORD: my-secret-pw
        #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
