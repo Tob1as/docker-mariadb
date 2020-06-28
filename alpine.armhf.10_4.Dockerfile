@@ -1,8 +1,8 @@
-FROM arm32v7/alpine:3.11
+FROM arm32v7/alpine:3.12
 
 LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
 	org.opencontainers.image.title="MariaDB" \
-	org.opencontainers.image.description="AlpineLinux 3.11 with MariaDB 10.4 on arm arch" \
+	org.opencontainers.image.description="AlpineLinux 3.12 with MariaDB 10.4 on arm arch" \
 	org.opencontainers.image.licenses="GPL-2.0" \
 	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
 	org.opencontainers.image.source="https://github.com/Tob1asDocker/rpi-mariadb"
@@ -13,7 +13,7 @@ RUN mkdir -p /var/lib/mysql && \
 	adduser -D -H -g "mysql" -u 1000 -h /var/lib/mysql -s /sbin/nologin mysql -G mysql
 
 # add gosu for easy step-down from root
-ENV GOSU_VERSION 1.11
+ENV GOSU_VERSION 1.12
 RUN set -eux; \
 	\
 	apk add --no-cache --virtual .gosu-deps \

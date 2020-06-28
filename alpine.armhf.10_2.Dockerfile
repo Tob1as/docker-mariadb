@@ -13,7 +13,7 @@ RUN mkdir -p /var/lib/mysql && \
 	adduser -D -H -g "mysql" -u 1000 -h /var/lib/mysql -s /sbin/nologin mysql -G mysql
 
 # add gosu for easy step-down from root
-ENV GOSU_VERSION 1.11
+ENV GOSU_VERSION 1.12
 RUN set -eux; \
 	\
 	apk add --no-cache --virtual .gosu-deps \

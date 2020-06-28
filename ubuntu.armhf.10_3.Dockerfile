@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM arm32v7/ubuntu:eoan
+FROM arm32v7/ubuntu:focal
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
@@ -18,7 +18,7 @@ RUN set -ex; \
 	rm -rf /var/lib/apt/lists/*
 
 # add gosu for easy step-down from root
-ENV GOSU_VERSION 1.11
+ENV GOSU_VERSION 1.12
 RUN set -ex; \
 	\
 	fetchDeps=' \
