@@ -4,6 +4,7 @@ services:
   mariadb:
     image: tobi312/rpi-mariadb:TAG
     container_name: mariadb
+    restart: unless-stopped
     volumes:
       - ./mariadb:/var/lib/mysql
       - /etc/timezone:/etc/timezone:ro
@@ -14,7 +15,12 @@ services:
        MYSQL_DATABASE: user
        MYSQL_USER: user
        MYSQL_PASSWORD: my-secret-pw
-    restart: unless-stopped
+       #MYSQL_EXPORTER_PASSWORD: my-secret-pw
+    #entrypoint:
+    #  sh -c "
+    #    echo \"SET GLOBAL time_zone = '$$TZ'; SET time_zone = '$$TZ'; SELECT CURRENT_TIME; CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '$$MYSQL_EXPORTER_PASSWORD' WITH MAX_USER_CONNECTIONS 3; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; \" > /docker-entrypoint-initdb.d/init.sql;
+    #    /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    #  "
     ports:
       - 3306:3306
     healthcheck:
