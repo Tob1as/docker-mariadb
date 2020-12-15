@@ -58,9 +58,20 @@ docker_process_init_files() {
 	local f
 	for f; do
 		case "$f" in
-			*.sh)     mysql_note "$0: running $f"; . "$f" ;;
+			*.sh)
+				# https://github.com/docker-library/postgres/issues/450#issuecomment-393167936
+				# https://github.com/docker-library/postgres/pull/452
+				if [ -x "$f" ]; then
+					mysql_note "$0: running $f"
+					"$f"
+				else
+					mysql_note "$0: sourcing $f"
+					. "$f"
+				fi
+				;;
 			*.sql)    mysql_note "$0: running $f"; docker_process_sql < "$f"; echo ;;
 			*.sql.gz) mysql_note "$0: running $f"; gunzip -c "$f" | docker_process_sql; echo ;;
+			*.sql.xz) mysql_note "$0: running $f"; xzcat "$f" | docker_process_sql; echo ;;
 			*)        mysql_warn "$0: ignoring $f" ;;
 		esac
 		echo
@@ -139,12 +150,10 @@ docker_create_db_directories() {
 # initializes the database directory
 docker_init_database_dir() {
 	mysql_note "Initializing database files"
-	installArgs=( --datadir="$DATADIR" --rpm )
-	if { mysql_install_db --help || :; } | grep -q -- '--auth-root-authentication-method'; then
-		# beginning in 10.4.3, install_db uses "socket" which only allows system user root to connect, switch back to "normal" to allow mysql root without a password
-		# see https://github.com/MariaDB/server/commit/b9f3f06857ac6f9105dc65caae19782f09b47fb3
-		# (this flag doesn't exist in 10.0 and below)
-		installArgs+=( --auth-root-authentication-method=normal )
+	installArgs=( --datadir="$DATADIR" --rpm --auth-root-authentication-method=normal )
+	if { mysql_install_db --help || :; } | grep -q -- '--skip-test-db'; then
+		# 10.3+
+		installArgs+=( --skip-test-db )
 	fi
 	# "Other options are passed to mysqld." (so we pass all "mysqld" arguments directly here)
 	mysql_install_db "${installArgs[@]}" "${@:2}"
@@ -187,18 +196,31 @@ docker_process_sql() {
 		set -- --database="$MYSQL_DATABASE" "$@"
 	fi
 
-	mysql --defaults-file=<( _mysql_passfile "${passfileArgs[@]}") --protocol=socket -uroot -hlocalhost --socket="${SOCKET}" "$@"
+	mysql --defaults-extra-file=<( _mysql_passfile "${passfileArgs[@]}") --protocol=socket -uroot -hlocalhost --socket="${SOCKET}" "$@"
 }
 
 # Initializes database with timezone info and root password, plus optional extra db/user
 docker_setup_db() {
 	# Load timezone info into database
 	if [ -z "$MYSQL_INITDB_SKIP_TZINFO" ]; then
-		# sed is for https://bugs.mysql.com/bug.php?id=20545
-		mysql_tzinfo_to_sql /usr/share/zoneinfo \
-			| sed 's/Local time zone must be set--see zic manual page/FCTY/' \
-			| docker_process_sql --dont-use-mysql-root-password --database=mysql
-			# tell docker_process_sql to not use MYSQL_ROOT_PASSWORD since it is not set yet
+		{
+			# Aria in 10.4+ is slow due to "transactional" (crash safety)
+			# https://jira.mariadb.org/browse/MDEV-23326
+			# https://github.com/docker-library/mariadb/issues/262
+			local tztables=( time_zone time_zone_leap_second time_zone_name time_zone_transition time_zone_transition_type )
+			for table in "${tztables[@]}"; do
+				echo "/*!100400 ALTER TABLE $table TRANSACTIONAL=0 */;"
+			done
+
+			# sed is for https://bugs.mysql.com/bug.php?id=20545
+			mysql_tzinfo_to_sql /usr/share/zoneinfo \
+				| sed 's/Local time zone must be set--see zic manual page/FCTY/'
+
+			for table in "${tztables[@]}"; do
+				echo "/*!100400 ALTER TABLE $table TRANSACTIONAL=1 */;"
+			done
+		} | docker_process_sql --dont-use-mysql-root-password --database=mysql
+		# tell docker_process_sql to not use MYSQL_ROOT_PASSWORD since it is not set yet
 	fi
 	# Generate random root password
 	if [ -n "$MYSQL_RANDOM_ROOT_PASSWORD" ]; then
@@ -223,7 +245,7 @@ docker_setup_db() {
 		--  or products like mysql-fabric won't work
 		SET @@SESSION.SQL_LOG_BIN=0;
 
-		DELETE FROM mysql.user WHERE user NOT IN ('mysql.sys', 'mysqlxsys', 'root') OR host NOT IN ('localhost') ;
+		DELETE FROM mysql.user WHERE user NOT IN ('mysql.sys', 'mariadb.sys', 'mysqlxsys', 'root') OR host NOT IN ('localhost') ;
 		SET PASSWORD FOR 'root'@'localhost'=PASSWORD('${MYSQL_ROOT_PASSWORD}') ;
 		-- 10.1: https://github.com/MariaDB/server/blob/d925aec1c10cebf6c34825a7de50afe4e630aff4/scripts/mysql_secure_installation.sh#L347-L365
 		-- 10.5: https://github.com/MariaDB/server/blob/00c3a28820c67c37ebbca72691f4897b57f2eed5/scripts/mysql_secure_installation.sh#L351-L369
@@ -247,17 +269,15 @@ docker_setup_db() {
 
 		if [ -n "$MYSQL_DATABASE" ]; then
 			mysql_note "Giving user ${MYSQL_USER} access to schema ${MYSQL_DATABASE}"
-			docker_process_sql --database=mysql <<<"GRANT ALL ON \`$MYSQL_DATABASE\`.* TO '$MYSQL_USER'@'%' ;"
+			docker_process_sql --database=mysql <<<"GRANT ALL ON \`${MYSQL_DATABASE//_/\\_}\`.* TO '$MYSQL_USER'@'%' ;"
 		fi
-
-		docker_process_sql --database=mysql <<<"FLUSH PRIVILEGES ;"
 	fi
 }
 
 _mysql_passfile() {
 	# echo the password to the "file" the client uses
 	# the client command will use process substitution to create a file on the fly
-	# ie: --defaults-file=<( _mysql_passfile )
+	# ie: --defaults-extra-file=<( _mysql_passfile )
 	if [ '--dont-use-mysql-root-password' != "$1" ] && [ -n "$MYSQL_ROOT_PASSWORD" ]; then
 		cat <<-EOF
 			[client]
@@ -304,6 +324,10 @@ _main() {
 		# there's no database, so it needs to be initialized
 		if [ -z "$DATABASE_ALREADY_EXISTS" ]; then
 			docker_verify_minimum_env
+
+			# check dir permissions to reduce likelihood of half-initialized database
+			ls /docker-entrypoint-initdb.d/ > /dev/null
+
 			docker_init_database_dir "$@"
 
 			mysql_note "Starting temporary server"

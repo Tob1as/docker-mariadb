@@ -1,8 +1,8 @@
-FROM arm32v7/alpine:3.12
+FROM arm32v7/alpine:edge
 
 LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
 	org.opencontainers.image.title="MariaDB" \
-	org.opencontainers.image.description="AlpineLinux 3.12 with MariaDB 10.4 on arm arch" \
+	org.opencontainers.image.description="AlpineLinux edge with MariaDB 10.4 on arm arch" \
 	org.opencontainers.image.licenses="GPL-2.0" \
 	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
 	org.opencontainers.image.source="https://github.com/Tob1asDocker/rpi-mariadb"
@@ -56,7 +56,7 @@ RUN set -ex; \
 		bash
 
 # bashbrew-architectures: armv7
-ENV MARIADB_VERSION 10.4
+ENV MARIADB_VERSION 10.5
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
 

@@ -13,6 +13,7 @@ RUN mkdir -p /var/lib/mysql && \
 	adduser -D -H -g "mysql" -u 1000 -h /var/lib/mysql -s /sbin/nologin mysql -G mysql
 
 # add gosu for easy step-down from root
+# https://github.com/tianon/gosu/releases
 ENV GOSU_VERSION 1.12
 RUN set -eux; \
 	\
@@ -30,7 +31,7 @@ RUN set -eux; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
 	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-	command -v gpgconf && gpgconf --kill all || :; \
+	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	\
 # clean up fetch dependencies
@@ -45,11 +46,13 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 # install "pwgen" for randomizing passwords
 # install "tzdata" for /usr/share/zoneinfo/
+# install "xz" for .sql.xz docker-entrypoint-initdb.d files
 # install "bash"
 RUN set -ex; \
 	apk --no-cache add \
 		pwgen \
 		tzdata \
+		xz \
 		bash
 
 # bashbrew-architectures: armv7
@@ -66,14 +69,16 @@ RUN set -ex; \
 		"mariadb-backup>$MARIADB_VERSION" \
 		socat \
 	; \
-# comment out any "user" entires in the MySQL config ("docker-entrypoint.sh" or "--user" will handle user switching)
-	sed -ri 's/^user\s/#&/' /etc/mysql/my.cnf; \
 # purge and re-create /var/lib/mysql with appropriate ownership
 	rm -rf /var/lib/mysql; \
 	mkdir -p /var/lib/mysql /run/mysqld; \
 	chown -R mysql:mysql /var/lib/mysql /run/mysqld; \
 # ensure that /run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
 	chmod 777 /run/mysqld; \
+# comment out a few problematic configuration values
+	sed -ri 's/^user\s/#&/' /etc/mysql/my.cnf; \
+	sed -ri 's/^bind-address\s/#&/' /etc/mysql/my.cnf; \
+	sed -ri 's/^log\s/#&/' /etc/mysql/my.cnf; \
 # listen on TCP/IP
 	#sed -i "s/skip-networking/#skip-networking/g" /etc/mysql/my.cnf; \
 # don't reverse lookup hostnames, they are usually another container

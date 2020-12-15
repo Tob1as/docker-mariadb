@@ -18,6 +18,7 @@ RUN set -ex; \
 	rm -rf /var/lib/apt/lists/*
 
 # add gosu for easy step-down from root
+# https://github.com/tianon/gosu/releases
 ENV GOSU_VERSION 1.12
 RUN set -eux; \
 # save list of currently installed packages for later so we can clean up
@@ -40,12 +41,12 @@ RUN set -eux; \
 	export GNUPGHOME="$(mktemp -d)"; \
 	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
 	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
-	command -v gpgconf && gpgconf --kill all || :; \
+	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
 	\
 # clean up fetch dependencies
 	apt-mark auto '.*' > /dev/null; \
-	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark; \
+	[ -z "$savedAptMark" ] || apt-mark manual $savedAptMark > /dev/null; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
 	\
 	chmod +x /usr/local/bin/gosu; \
@@ -57,11 +58,13 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 # install "pwgen" for randomizing passwords
 # install "tzdata" for /usr/share/zoneinfo/
+# install "xz-utils" for .sql.xz docker-entrypoint-initdb.d files
 RUN set -ex; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		pwgen \
 		tzdata \
+		xz-utils \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
@@ -90,8 +93,6 @@ RUN set -ex; \
 		socat \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
-# comment out any "user" entires in the MySQL config ("docker-entrypoint.sh" or "--user" will handle user switching)
-	sed -ri 's/^user\s/#&/' /etc/mysql/my.cnf /etc/mysql/conf.d/*; \
 # purge and re-create /var/lib/mysql with appropriate ownership
 	rm -rf /var/lib/mysql; \
 	mkdir -p /var/lib/mysql /var/run/mysqld; \
@@ -100,8 +101,8 @@ RUN set -ex; \
 	chmod 777 /var/run/mysqld; \
 # comment out a few problematic configuration values
 	find /etc/mysql/ -name '*.cnf' -print0 \
-		| xargs -0 grep -lZE '^(bind-address|log)' \
-		| xargs -rt -0 sed -Ei 's/^(bind-address|log)/#&/'; \
+		| xargs -0 grep -lZE '^(bind-address|log|user\s)' \
+		| xargs -rt -0 sed -Ei 's/^(bind-address|log|user\s)/#&/'; \
 # don't reverse lookup hostnames, they are usually another container
 	echo '[mysqld]\nskip-host-cache\nskip-name-resolve' > /etc/mysql/conf.d/docker.cnf
 

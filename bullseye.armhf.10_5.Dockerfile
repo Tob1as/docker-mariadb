@@ -1,5 +1,11 @@
-# vim:set ft=dockerfile:
-FROM arm32v7/ubuntu:focal
+FROM arm32v7/debian:bullseye-slim
+
+LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
+	org.opencontainers.image.title="MariaDB" \
+	org.opencontainers.image.description="Debian 11 Bullseye with MariaDB 10.5 on arm arch" \
+	org.opencontainers.image.licenses="GPL-2.0" \
+	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
+	org.opencontainers.image.source="https://github.com/Tob1asDocker/rpi-mariadb"
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
@@ -11,7 +17,7 @@ RUN set -ex; \
 		apt-get install -y --no-install-recommends gnupg; \
 	fi; \
 	if ! gpg --version | grep -q '^gpg (GnuPG) 1\.'; then \
-# Ubuntu includes "gnupg" (not "gnupg2", but still 2.x), but not dirmngr, and gnupg 2.x requires dirmngr
+# Debian includes "gnupg" (not "gnupg2", but still 2.x), but not dirmngr, and gnupg 2.x requires dirmngr
 # so, if we're not running gnupg 1.x, explicitly install dirmngr too
 		apt-get install -y --no-install-recommends dirmngr; \
 	fi; \
@@ -71,8 +77,8 @@ RUN set -ex; \
 # GPG_KEYS for repository not needed.
 
 # bashbrew-architectures: armv7
-ENV MARIADB_MAJOR 10.3
-ENV MARIADB_VERSION 1:10.3.*
+ENV MARIADB_MAJOR 10.5
+ENV MARIADB_VERSION 1:10.5.*
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
 
@@ -110,7 +116,7 @@ VOLUME /var/lib/mysql
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
+#RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306

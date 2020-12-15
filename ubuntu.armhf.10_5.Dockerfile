@@ -1,5 +1,5 @@
 # vim:set ft=dockerfile:
-FROM arm32v7/ubuntu:focal
+FROM arm32v7/ubuntu:hirsute
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
@@ -71,8 +71,8 @@ RUN set -ex; \
 # GPG_KEYS for repository not needed.
 
 # bashbrew-architectures: armv7
-ENV MARIADB_MAJOR 10.3
-ENV MARIADB_VERSION 1:10.3.*
+ENV MARIADB_MAJOR 10.5
+ENV MARIADB_VERSION 1:10.5.*
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
 
@@ -110,7 +110,7 @@ VOLUME /var/lib/mysql
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
+#RUN ln -s usr/local/bin/docker-entrypoint.sh / # backwards compat
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306

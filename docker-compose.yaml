@@ -1,21 +1,26 @@
-# Use root/my-secret-pw as user/password credentials
 version: '2.4'
+
 services:
   mariadb:
-    image: tobi312/rpi-mariadb:TAG
-    container_name: mariadb
+    #build:
+    #  context: ./
+    #  dockerfile: alpine.armhf.10_4.Dockerfile
+    image: tobi312/rpi-mariadb:10.4-alpine
+    #container_name: mariadb
     restart: unless-stopped
     volumes:
-      - ./mariadb:/var/lib/mysql
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      #- mariadb-data:/var/lib/mysql:rw
+      - ./mariadb:/var/lib/mysql:rw
+      #- /etc/timezone:/etc/timezone:ro
+      #- /etc/localtime:/etc/localtime:ro
     environment:
-       MYSQL_ROOT_PASSWORD: my-secret-pw
-       #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-       MYSQL_DATABASE: user
-       MYSQL_USER: user
-       MYSQL_PASSWORD: my-secret-pw
-       #MYSQL_EXPORTER_PASSWORD: my-secret-pw
+      TZ: Europe/Berlin
+      #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: user
+      MYSQL_USER: user
+      MYSQL_PASSWORD: my-secret-pw
+      #MYSQL_EXPORTER_PASSWORD: my-secret-pw
     #entrypoint:
     #  sh -c "
     #    echo \"SET GLOBAL time_zone = '$$TZ'; SET time_zone = '$$TZ'; SELECT CURRENT_TIME; CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '$$MYSQL_EXPORTER_PASSWORD' WITH MAX_USER_CONNECTIONS 3; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; \" > /docker-entrypoint-initdb.d/init.sql;
@@ -24,8 +29,21 @@ services:
     ports:
       - 3306:3306
     healthcheck:
-      test:  mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || exit 1
-      #test:  mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD || exit 1
+      test:  mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD || exit 1
+      #test:  mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || exit 1
       interval: 30s
       timeout: 5s
       retries: 5
+    networks:
+      net-db:
+        aliases:
+         - mysql
+         #- mariadb
+         - db
+
+networks:
+  net-db:
+    name: net-db
+
+#volumes:
+#  mariadb-data:
