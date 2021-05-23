@@ -2,18 +2,18 @@
 
 ### Supported tags and respective `Dockerfile` links
 -	[`10.5` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/bullseye.armhf.10_5.Dockerfile) (on Debian 11 Bullseye) (**unstable**)
--	[`10.3`, `latest` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/buster.armhf.10_3.Dockerfile) (on Debian 10 Buster)
+-	[`10.3` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/buster.armhf.10_3.Dockerfile) (on Debian 10 Buster)
 -	[`10.1` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/stretch.armhf.10_1.Dockerfile) (on Debian 9 Stretch)
 
--	[`10.5-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.armhf.10_5.Dockerfile) (on [Ubuntu](https://packages.ubuntu.com/search?arch=armhf&searchon=names&keywords=mariadb-server-10.5) 21.04 Hirsute Hippo) (**unstable**)
+-	[`10.5-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.armhf.10_5.Dockerfile) (on [Ubuntu](https://packages.ubuntu.com/search?arch=armhf&searchon=names&keywords=mariadb-server-10.5) 21.04 Hirsute Hippo)
 -	[`10.3-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.armhf.10_3.Dockerfile) (on [Ubuntu](https://packages.ubuntu.com/search?arch=armhf&searchon=names&keywords=mariadb-server-10.3) 20.04 LTS Focal Fossa)
 -	[`10.1-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.armhf.10_1.Dockerfile) (on [Ubuntu](https://packages.ubuntu.com/search?arch=armhf&searchon=names&keywords=mariadb-server-10.1) 18.04 LTS Bionic Beaver)
 
 -	[`10.5-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_5.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.13/main/armhf/mariadb) 3.13)
 -	[`10.4-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_4.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.12/main/armhf/mariadb) 3.12)
 -	[`10.3-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_3.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.10/main/armhf/mariadb) 3.10)
--	[`10.2-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_2.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.8/main/armhf/mariadb) 3.8) (productive use not recommended) (*)
--	[`10.1-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_1.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.7/main/armhf/mariadb) 3.7) (productive use not recommended) (*)
+-	[`10.2-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_2.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.8/main/armhf/mariadb) 3.8 - productive use not recommended) (*)
+-	[`10.1-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.armhf.10_1.Dockerfile) (on [AlpineLinux](https://pkgs.alpinelinux.org/package/v3.7/main/armhf/mariadb) 3.7 - productive use not recommended) (*)
 
 # What is MariaDB?
 
@@ -67,7 +67,11 @@ services:
 
 #### Troubleshooting
 
-If your container fails to start with Images that based on Alpine 3.13 and newer Ubuntu/Debian on ARM devices with Raspbian/Debian 10 Buster (32 bit) then update `libseccomp2`[*](https://packages.debian.org/buster-backports/libseccomp2) to >=2.4.4 and restart the container. (Source: [1](https://docs.linuxserver.io/faq#libseccomp), [2](https://github.com/owncloud/docs/pull/3196#issue-577993147), [3](https://github.com/moby/moby/issues/40734))  
+<details>
+<summary>If your container fails to start with Images that based on Alpine 3.13 or newer Debian/Ubuntu on ARM devices...</summary>
+<p>
+
+... with Raspbian/Debian 10 Buster (32 bit) then update `libseccomp2`[*](https://packages.debian.org/buster-backports/libseccomp2) to >=2.4.4 and restart the container. (Source: [1](https://docs.linuxserver.io/faq#libseccomp), [2](https://github.com/owncloud/docs/pull/3196#issue-577993147), [3](https://github.com/moby/moby/issues/40734))  
   
 Example (wrong date):
 ```sh
@@ -81,7 +85,11 @@ Solution:
  echo "deb http://deb.debian.org/debian buster-backports main" | sudo tee -a /etc/apt/sources.list.d/buster-backports.list
  sudo apt update
  sudo apt install -t buster-backports libseccomp2
+ # optional: delete backports list
+ sudo rm /etc/apt/sources.list.d/buster-backports.list
 ```
+</p>
+</details>
 
 ### This Image on
 * [DockerHub](https://hub.docker.com/r/tobi312/rpi-mariadb/)
