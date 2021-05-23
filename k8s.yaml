@@ -1,0 +1,219 @@
+##  __  __            _       ____  ____
+## |  \/  | __ _ _ __(_) __ _|  _ \| __ )
+## | |\/| |/ _` | '__| |/ _` | | | |  _ \
+## | |  | | (_| | |  | | (_| | |_| | |_) |
+## |_|  |_|\__,_|_|  |_|\__,_|____/|____/
+## 
+
+## https://mariadb.org/ + https://github.com/MariaDB/server
+## https://hub.docker.com/_/mariadb + https://github.com/MariaDB/mariadb-docker
+## https://hub.docker.com/r/tobi312/rpi-mariadb/ + https://github.com/Tob1asDocker/rpi-mariadb
+
+## https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/
+
+## root login?
+## [DE] https://kofler.info/root-login-problem-mit-mariadb/ + https://www.linuxmaker.com/tutorials/mariadb-problem-mit-root-login.html
+## [EN] https://community.flexera.com/t5/Software-Vulnerability-Manager/Grant-Remote-Access-to-Root-in-MariaDB-On-Prem/ta-p/4967
+
+## reset pw: https://linuxconfig.org/how-to-reset-root-mysql-mariadb-password-on-ubuntu-20-04-focal-fossa-linux
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-env-config
+  namespace: default
+  labels:
+    app: mariadb
+data:
+  MYSQL_DATABASE: website
+  TZ: "Europe/Berlin"
+  #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+
+---
+
+## convert string to base64 in Linux: "echo -n 'value' | base64"
+## example generator for Password: https://passwordsgenerator.net/
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mariadb-env-secret
+  namespace: default
+  labels:
+    app: mariadb
+data:
+  MYSQL_ROOT_PASSWORD: eE5rOVUjeHQyM2t2RyFjMg==      # xNk9U#xt23kvG!c2
+  MYSQL_USER: d2Vic2l0ZQ==                           # website
+  MYSQL_PASSWORD: dzZqcjV2U2d4V2FndVJHYw==           # w6jr5vSgxWaguRGc
+  MYSQL_EXPORTER_PASSWORD: dDlzRFNwTjMjOWdEUVZSYQ==  # t9sDSpN3#9gDQVRa
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mariadb
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+      annotations:
+        field.cattle.io/workloadMetrics: '[{"path":"/metrics","port":9104,"schema":"HTTP"}]'
+    spec:
+      containers:
+        - name: mariadb
+          #image: mariadb:10.4
+          image: tobi312/rpi-mariadb:10.4-alpine
+          imagePullPolicy: Always
+          envFrom:
+          - configMapRef:
+              name: mariadb-env-config
+          - secretRef:
+              name: mariadb-env-secret
+          ports:
+            - containerPort: 3306
+          command: ["/bin/sh", "-c", "echo \"SET GLOBAL time_zone = '$(TZ)'; SET time_zone = '$(TZ)'; SELECT CURRENT_TIME; CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '$(MYSQL_EXPORTER_PASSWORD)' WITH MAX_USER_CONNECTIONS 3; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; \" > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"]
+          readinessProbe:
+            exec:
+              command: ["/bin/sh", "-c", "mysqladmin ping -h localhost --user=$MYSQL_USER --password=$MYSQL_PASSWORD || exit 1"]
+            #tcpSocket:
+            #  port: 3306
+            initialDelaySeconds: 15
+            periodSeconds: 120
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["/bin/sh", "-c", "mysqladmin ping -h localhost --user=$MYSQL_USER --password=$MYSQL_PASSWORD || exit 1"]
+            #tcpSocket:
+            #  port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 120
+            timeoutSeconds: 5
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "0.5"
+            limits:
+              memory: "1Gi"
+              cpu: "1.0"
+          volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mariadb-data
+          - name: mariadb-db-file-config
+            mountPath: /etc/mysql/mariadb.conf.d/99-my.cnf
+            subPath: 99-my.cnf
+        - name: exporter
+          image: prom/mysqld-exporter
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 9104
+          env:
+          - name: EXPORTER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mariadb-env-secret
+                key: MYSQL_EXPORTER_PASSWORD
+          - name: DATA_SOURCE_NAME
+            value: "exporter:$(EXPORTER_PASSWORD)@(localhost:3306)/"
+          args: ["--web.listen-address", ":9104", "--web.telemetry-path", "/metrics"]
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "0.1"
+            limits:
+              memory: "256Mi"
+              cpu: "0.5"
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+        - name: mariadb-data
+          persistentVolumeClaim:
+            claimName: mariadb-data
+        - name: mariadb-db-file-config
+          configMap:
+            name: mariadb-db-file-config
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: default
+  labels:
+    app: mariadb
+spec:
+  type: ClusterIP    # default: "ClusterIP" , set to "NodePort" for access over external-ip
+  ports:
+    - name: "mariadb"
+      protocol: TCP
+      port: 3306
+      targetPort: 3306
+      #nodePort: 3306
+    - name: "mariadb-exporter"
+      protocol: TCP
+      port: 9104
+      targetPort: 9104
+  selector:
+    app: mariadb
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-db-file-config
+  namespace: default
+  labels:
+    app: mariadb
+data:
+  99-my.cnf: |-
+    [mysqld]
+    skip-host-cache
+    skip-name-resolve
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-data
+  namespace: default
+  labels:
+    app: mariadb
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: manual
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  persistentVolumeReclaimPolicy: Delete
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/k8sdata"
