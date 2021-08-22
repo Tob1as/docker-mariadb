@@ -53,6 +53,7 @@ RUN set -ex; \
 		pwgen \
 		tzdata \
 		xz \
+		zstd \
 		bash
 
 # bashbrew-architectures: armv7

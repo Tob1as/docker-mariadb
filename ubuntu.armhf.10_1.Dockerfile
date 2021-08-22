@@ -65,6 +65,7 @@ RUN set -ex; \
 		pwgen \
 		tzdata \
 		xz-utils \
+		zstd \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
