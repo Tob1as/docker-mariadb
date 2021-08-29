@@ -63,7 +63,7 @@ RUN set -ex; \
 		bash
 
 # bashbrew-architectures: armv7
-ENV MARIADB_VERSION 10.5
+ENV MARIADB_VERSION 10.6
 # release-status:Stable
 # (https://downloads.mariadb.org/mariadb/+releases/)
 

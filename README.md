@@ -36,7 +36,7 @@ The intent is also to maintain high compatibility with MySQL, ensuring a library
 
 ### How to use these images:
 
-* ``` $ docker run --name some-mariadb -v $(pwd)/mariadb:/var/lib/mysql -p 3306:3306  -e MARIADB_ROOT_PASSWORD=my-secret-pw -d tobi312/rpi-mariadb:TAG ```
+* ``` $ docker run --name some-mariadb -v $(pwd)/mariadb:/var/lib/mysql -p 3306:3306  -e MYSQL_ROOT_PASSWORD=my-secret-pw -d tobi312/rpi-mariadb:TAG ```
 * more see official [MariaDB](https://hub.docker.com/_/mariadb)-Image
 
 #### Docker-Compose
@@ -52,16 +52,16 @@ services:
       - ./mariadb:/var/lib/mysql
     environment:
       TZ: Europe/Berlin
-      #MARIADB_RANDOM_ROOT_PASSWORD: "yes"
-      MARIADB_ROOT_PASSWORD: my-secret-pw
-      MARIADB_DATABASE: user
-      MARIADB_USER: user
-      MARIADB_PASSWORD: my-secret-pw
+      #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: user
+      MYSQL_USER: user
+      MYSQL_PASSWORD: my-secret-pw
     ports:
       - 3306:3306
     healthcheck:
-      test:  mysqladmin ping -h 127.0.0.1 -u root --password=$$MARIADB_ROOT_PASSWORD || exit 1
-      #test:  mysqladmin ping -h 127.0.0.1 -u $$MARIADB_USER --password=$$MARIADB_PASSWORD || exit 1
+      test:  mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD || exit 1
+      #test:  mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD || exit 1
       interval: 60s
       timeout: 5s
       retries: 5

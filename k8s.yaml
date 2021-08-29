@@ -27,9 +27,9 @@ metadata:
   labels:
     app: mariadb
 data:
-  MARIADB_DATABASE: website
+  MYSQL_DATABASE: website
   TZ: "Europe/Berlin"
-  #MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+  #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
 
 ---
 
@@ -44,10 +44,10 @@ metadata:
   labels:
     app: mariadb
 data:
-  MARIADB_ROOT_PASSWORD: eE5rOVUjeHQyM2t2RyFjMg==      # xNk9U#xt23kvG!c2
-  MARIADB_USER: d2Vic2l0ZQ==                           # website
-  MARIADB_PASSWORD: dzZqcjV2U2d4V2FndVJHYw==           # w6jr5vSgxWaguRGc
-  MARIADB_EXPORTER_PASSWORD: dDlzRFNwTjMjOWdEUVZSYQ==  # t9sDSpN3#9gDQVRa
+  MYSQL_ROOT_PASSWORD: eE5rOVUjeHQyM2t2RyFjMg==      # xNk9U#xt23kvG!c2
+  MYSQL_USER: d2Vic2l0ZQ==                           # website
+  MYSQL_PASSWORD: dzZqcjV2U2d4V2FndVJHYw==           # w6jr5vSgxWaguRGc
+  MYSQL_EXPORTER_PASSWORD: dDlzRFNwTjMjOWdEUVZSYQ==  # t9sDSpN3#9gDQVRa
 
 ---
 
@@ -122,7 +122,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: mariadb-env-secret
-                key: MARIADB_EXPORTER_PASSWORD
+                key: MYSQL_EXPORTER_PASSWORD
           - name: DATA_SOURCE_NAME
             value: "exporter:$(EXPORTER_PASSWORD)@(localhost:3306)/"
           args: ["--web.listen-address", ":9104", "--web.telemetry-path", "/metrics"]
