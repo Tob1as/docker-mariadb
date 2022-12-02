@@ -23,8 +23,8 @@ The intent is also to maintain high compatibility with MySQL, ensuring a library
 * a port of the official [MariaDB](https://hub.docker.com/_/mariadb)-Image ([GitHub](https://github.com/MariaDB/mariadb-docker)).
 * based on official distributions Images: 
   * [Alpine](https://hub.docker.com/_/alpine)
+  * [Ubuntu](https://hub.docker.com/_/ubuntu)
   * ~~[Debian](https://hub.docker.com/_/debian)~~
-  * ~~[Ubuntu](https://hub.docker.com/_/ubuntu)~~
 * build:
   * with Github Actions
   * ~~on Docker Hub with Autobuild, for example and more details see in this [repository](https://github.com/Tob1asDocker/dockerhubhooksexample).~~
