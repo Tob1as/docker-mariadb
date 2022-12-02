@@ -1,4 +1,4 @@
-# MariaDB (MySQL fork) - Alpine Docker Image for amd64, arm64, arm 
+# MariaDB (MySQL fork) - Alpine/Ubuntu Docker Image for amd64, arm64, arm 
 
 ### Supported tags and respective `Dockerfile` links
 -	[`10.6-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.10_6.Dockerfile) (on AlpineLinux [3.17](https://pkgs.alpinelinux.org/package/v3.17/main/armhf/mariadb))
