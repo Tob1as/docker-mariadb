@@ -19,6 +19,25 @@
 
 ---
 
+## volume
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-data
+  namespace: default
+  labels:
+    app: mariadb
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: local-path # https://github.com/rancher/local-path-provisioner
+  resources:
+    requests:
+      storage: 25Gi
+
+---
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -27,14 +46,14 @@ metadata:
   labels:
     app: mariadb
 data:
-  MYSQL_DATABASE: website
   TZ: "Europe/Berlin"
-  #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+  MARIADB_DATABASE: user-database
+  #MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+  MARIADB_MYSQL_LOCALHOST_USER: "true"
 
 ---
 
 ## convert string to base64 in Linux: "echo -n 'value' | base64"
-## example generator for Password: https://passwordsgenerator.net/
 
 apiVersion: v1
 kind: Secret
@@ -44,10 +63,10 @@ metadata:
   labels:
     app: mariadb
 data:
-  MYSQL_ROOT_PASSWORD: eE5rOVUjeHQyM2t2RyFjMg==      # xNk9U#xt23kvG!c2
-  MYSQL_USER: d2Vic2l0ZQ==                           # website
-  MYSQL_PASSWORD: dzZqcjV2U2d4V2FndVJHYw==           # w6jr5vSgxWaguRGc
-  MYSQL_EXPORTER_PASSWORD: dDlzRFNwTjMjOWdEUVZSYQ==  # t9sDSpN3#9gDQVRa
+  MARIADB_ROOT_PASSWORD: bXktc2VjcmV0LXB3              # my-secret-pw
+  MARIADB_USER: ZXhhbXBsZS11c2Vy                       # example-user
+  MARIADB_PASSWORD: bXlfY29vbF9zZWNyZXQ=               # my_cool_secret
+  MARIADB_EXPORTER_PASSWORD: dDlzRFNwTjMjOWdEUVZSYQ==  # t9sDSpN3#9gDQVRa
 
 ---
 
@@ -67,13 +86,12 @@ spec:
     metadata:
       labels:
         app: mariadb
-      annotations:
-        field.cattle.io/workloadMetrics: '[{"path":"/metrics","port":9104,"schema":"HTTP"}]'
+      annotations: {}
     spec:
       containers:
         - name: mariadb
-          #image: mariadb:10.4
-          image: tobi312/rpi-mariadb:10.4-alpine
+          #image: mariadb:10.6
+          image: tobi312/rpi-mariadb:10.6-alpine
           imagePullPolicy: Always
           envFrom:
           - configMapRef:
@@ -82,10 +100,10 @@ spec:
               name: mariadb-env-secret
           ports:
             - containerPort: 3306
-          command: ["/bin/sh", "-c", "echo \"SET GLOBAL time_zone = '$(TZ)'; SET time_zone = '$(TZ)'; SELECT CURRENT_TIME; CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '$(MYSQL_EXPORTER_PASSWORD)' WITH MAX_USER_CONNECTIONS 3; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; \" > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"]
+          command: ["/bin/sh", "-c", "echo \"SET GLOBAL time_zone = '$(TZ)'; SET time_zone = '$(TZ)'; SELECT CURRENT_TIME; CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '$(MARIADB_EXPORTER_PASSWORD)' WITH MAX_USER_CONNECTIONS 3; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; \" > /docker-entrypoint-initdb.d/init.sql; /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"]
           readinessProbe:
             exec:
-              command: ["/bin/sh", "-c", "mysqladmin ping -h localhost --user=$MYSQL_USER --password=$MYSQL_PASSWORD || exit 1"]
+              command: ["/bin/sh", "-c", "mysqladmin ping -h localhost --user=$MARIADB_USER --password=$MARIADB_PASSWORD || exit 1"]
             #tcpSocket:
             #  port: 3306
             initialDelaySeconds: 15
@@ -93,7 +111,7 @@ spec:
             timeoutSeconds: 5
           livenessProbe:
             exec:
-              command: ["/bin/sh", "-c", "mysqladmin ping -h localhost --user=$MYSQL_USER --password=$MYSQL_PASSWORD || exit 1"]
+              command: ["/bin/sh", "-c", "mysqladmin ping -h localhost --user=$MARIADB_USER --password=$MARIADB_PASSWORD || exit 1"]
             #tcpSocket:
             #  port: 3306
             initialDelaySeconds: 30
@@ -107,13 +125,13 @@ spec:
               memory: "1Gi"
               cpu: "1.0"
           volumeMounts:
-          - mountPath: /var/lib/mysql
-            name: mariadb-data
+          - name: mariadb-data
+            mountPath: /var/lib/mysql
           - name: mariadb-db-file-config
-            mountPath: /etc/mysql/mariadb.conf.d/99-my.cnf
+            mountPath: /etc/my.cnf.d/99-my.cnf # for offical image use: /etc/mysql/mariadb.conf.d/99-my.cnf
             subPath: 99-my.cnf
         - name: exporter
-          image: prom/mysqld-exporter
+          image: prom/mysqld-exporter:latest
           imagePullPolicy: Always
           ports:
           - containerPort: 9104
@@ -122,7 +140,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: mariadb-env-secret
-                key: MYSQL_EXPORTER_PASSWORD
+                key: MARIADB_EXPORTER_PASSWORD
           - name: DATA_SOURCE_NAME
             value: "exporter:$(EXPORTER_PASSWORD)@(localhost:3306)/"
           args: ["--web.listen-address", ":9104", "--web.telemetry-path", "/metrics"]
@@ -159,7 +177,7 @@ spec:
       protocol: TCP
       port: 3306
       targetPort: 3306
-      #nodePort: 3306
+      #nodePort: 33306
     - name: "mariadb-exporter"
       protocol: TCP
       port: 9104
@@ -181,39 +199,3 @@ data:
     [mysqld]
     skip-host-cache
     skip-name-resolve
-
----
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mariadb-data
-  namespace: default
-  labels:
-    app: mariadb
-spec:
-  accessModes:
-    - ReadWriteOnce
-  volumeMode: Filesystem
-  resources:
-    requests:
-      storage: 20Gi
-  storageClassName: manual
-
----
-
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: pv-volume
-  labels:
-    type: local
-spec:
-  storageClassName: manual
-  persistentVolumeReclaimPolicy: Delete
-  capacity:
-    storage: 100Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/k8sdata"

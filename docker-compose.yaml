@@ -1,50 +1,31 @@
 version: '2.4'
-
 services:
+
   mariadb:
     #build:
     #  context: ./
-    #  dockerfile: alpine.armhf.10_4.Dockerfile
-    image: tobi312/rpi-mariadb:10.4-alpine
-    #container_name: mariadb
+    #  dockerfile: alpine.10_6.Dockerfile
+    image: tobi312/rpi-mariadb:10.6-alpine
+    container_name: mariadb
     restart: unless-stopped
     volumes:
-      #- mariadb-data:/var/lib/mysql:rw
-      - ./mariadb:/var/lib/mysql:rw
-      #- /etc/timezone:/etc/timezone:ro
-      #- /etc/localtime:/etc/localtime:ro
+      - ./mariadb-data:/var/lib/mysql:rw
     environment:
       TZ: Europe/Berlin
-      #MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_ROOT_PASSWORD: my-secret-pw
-      MYSQL_DATABASE: user
-      MYSQL_USER: user
-      MYSQL_PASSWORD: my-secret-pw
-      #MYSQL_EXPORTER_PASSWORD: my-secret-pw
-    #entrypoint:
-    #  sh -c "
-    #    echo \"SET GLOBAL time_zone = '$$TZ'; SET time_zone = '$$TZ'; SELECT CURRENT_TIME; CREATE USER IF NOT EXISTS 'exporter'@'%' IDENTIFIED BY '$$MYSQL_EXPORTER_PASSWORD' WITH MAX_USER_CONNECTIONS 3; GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'exporter'@'%'; \" > /docker-entrypoint-initdb.d/init.sql;
-    #    /usr/local/bin/docker-entrypoint.sh --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    #  "
+      #MARIADB_RANDOM_ROOT_PASSWORD: "yes"
+      MARIADB_ROOT_PASSWORD: my-secret-pw
+      MARIADB_DATABASE: user-database
+      MARIADB_USER: example-user
+      MARIADB_PASSWORD: my_cool_secret
+      MARIADB_MYSQL_LOCALHOST_USER: true
     ports:
       - 3306:3306
     healthcheck:
-      test:  mysqladmin ping -h 127.0.0.1 -u root --password=$$MYSQL_ROOT_PASSWORD || exit 1
-      #test:  mysqladmin ping -h 127.0.0.1 -u $$MARIADB --password=$$MYSQL_PASSWORD || exit 1
+      #test:  mysqladmin ping -h 127.0.0.1 -u root --password=$$MARIADB_ROOT_PASSWORD || exit 1
+      #test:  mysqladmin ping -h 127.0.0.1 -u $$MARIADB_USER --password=$$MARIADB_PASSWORD || exit 1
+      # https://github.com/MariaDB/mariadb-docker/issues/94#issuecomment-1069429616
+      test: ["CMD", "/usr/local/bin/healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
       interval: 60s
       timeout: 5s
       retries: 5
       #start_period: 30s
-    networks:
-      net-db:
-        aliases:
-         - mysql
-         #- mariadb
-         - db
-
-networks:
-  net-db:
-    name: net-db
-
-#volumes:
-#  mariadb-data:
