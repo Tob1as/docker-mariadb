@@ -2,10 +2,11 @@
 
 ### Supported tags and respective `Dockerfile` links
 -	[`10.6-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.10_6.Dockerfile) (on AlpineLinux [3.17](https://pkgs.alpinelinux.org/package/v3.17/main/armhf/mariadb))
+-	[`10.6-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.10_6.Dockerfile) (on Ubuntu [Jammy 22.04 LTS](https://packages.ubuntu.com/search?keywords=mariadb-server))
     
 *Notes:  
 Since December 2022 the Debian, Ubuntu and older Alpine images provided in the Docker Hub repository are no longer maintained/updated. Continued use is not recommended.  
-MariaDB 10.6 is the current LTS version and is only available on AlpineLinux (from version 3.15).  
+MariaDB 10.6 is the current LTS version and is available on AlpineLinux (from version 3.15) and Ubuntu Jammy.  
 For amd64 and arm64 it is recommended to use the [official images](https://hub.docker.com/_/mariadb) based on Ubuntu.* 
 
 # What is MariaDB?
