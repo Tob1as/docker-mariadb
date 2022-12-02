@@ -1,4 +1,4 @@
-FROM arm32v7/debian:buster-slim
+FROM debian:buster-slim
 
 LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
 	org.opencontainers.image.title="MariaDB" \

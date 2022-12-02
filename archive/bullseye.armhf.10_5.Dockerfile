@@ -1,4 +1,4 @@
-FROM arm32v7/debian:bullseye-slim
+FROM debian:bullseye-slim
 
 LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
 	org.opencontainers.image.title="MariaDB" \

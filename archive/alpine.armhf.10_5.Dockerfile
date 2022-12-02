@@ -1,4 +1,4 @@
-FROM arm32v7/alpine:3.14
+FROM alpine:3.14
 
 LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesheimer <docker@ison.ws>" \
 	org.opencontainers.image.title="MariaDB" \
