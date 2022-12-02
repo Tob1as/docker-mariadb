@@ -19,7 +19,7 @@ The intent is also to maintain high compatibility with MySQL, ensuring a library
 ![logo](https://raw.githubusercontent.com/docker-library/docs/master/mariadb/logo.png)
 
 ### About these images:
-* a port of the official [MariaDB](https://hub.docker.com/_/mariadb)-Image ([GitHub](https://github.com/docker-library/mariadb/tree/master)).
+* a port of the official [MariaDB](https://hub.docker.com/_/mariadb)-Image ([GitHub](https://github.com/MariaDB/mariadb-docker)).
 * based on official distributions Images: 
   * [Alpine](https://hub.docker.com/_/alpine)
   * ~~[Debian](https://hub.docker.com/_/debian)~~
