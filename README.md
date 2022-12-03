@@ -3,7 +3,7 @@
 ### Supported tags and respective `Dockerfile` links
 -	[`10.6-alpine` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/alpine.10_6.Dockerfile) (on AlpineLinux [3.17](https://pkgs.alpinelinux.org/package/v3.17/main/armhf/mariadb))
 -	[`10.6-ubuntu` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.10_6.Dockerfile) (on Ubuntu [22.04 LTS (Jammy)](https://packages.ubuntu.com/search?keywords=mariadb-server))
--	[`10.6-debian` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.10_6.Dockerfile) (on Debian [12 (bookworm)](https://packages.ubuntu.com/search?keywords=mariadb-server)) Status: **Testing**
+-	[`10.6-debian` (*Dockerfile*)](https://github.com/Tob1asDocker/rpi-mariadb/blob/master/ubuntu.10_6.Dockerfile) (on Debian [12 (bookworm)](https://packages.debian.org/bookworm/mariadb-server)) Status: **Testing**
   
 *Notes:  
 Since December 2022 the older images/versions provided in the Docker Hub repository are no longer maintained/updated. Continued use is not recommended.  
