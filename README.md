@@ -7,7 +7,7 @@
   
 *Notes:  
 Since December 2022 the older images/versions provided in the Docker Hub repository are no longer maintained/updated. Continued use is not recommended.  
-MariaDB 10.6 is the current LTS version and is available on AlpineLinux (from version 3.15), Ubuntu Jammy and Debian bookworm.  
+**MariaDB 10.6 is the current LTS version** and is available on AlpineLinux (from version 3.15), Ubuntu Jammy and Debian bookworm.  
 For amd64 and arm64 it is recommended to use the [official images](https://hub.docker.com/_/mariadb) based on Ubuntu.* 
 
 # What is MariaDB?
