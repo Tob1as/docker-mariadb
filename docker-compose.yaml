@@ -6,6 +6,8 @@ services:
     #  context: ./
     #  dockerfile: alpine.10_6.Dockerfile
     image: tobi312/rpi-mariadb:10.6-alpine
+    #image: tobi312/rpi-mariadb:10.6-ubuntu
+    #image: tobi312/rpi-mariadb:10.6-debian
     container_name: mariadb
     restart: unless-stopped
     volumes:
@@ -17,7 +19,7 @@ services:
       MARIADB_DATABASE: user-database
       MARIADB_USER: example-user
       MARIADB_PASSWORD: my_cool_secret
-      MARIADB_MYSQL_LOCALHOST_USER: true
+      MARIADB_MYSQL_LOCALHOST_USER: true  # need for healthcheck.sh
     ports:
       - 3306:3306
     healthcheck:
