@@ -7,7 +7,7 @@
 
 ## https://mariadb.org/ + https://github.com/MariaDB/server
 ## https://hub.docker.com/_/mariadb + https://github.com/MariaDB/mariadb-docker
-## https://hub.docker.com/r/tobi312/rpi-mariadb/ + https://github.com/Tob1asDocker/rpi-mariadb
+## https://hub.docker.com/r/tobi312/rpi-mariadb/ + https://github.com/Tob1as/docker-mariadb
 
 ## https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/
 

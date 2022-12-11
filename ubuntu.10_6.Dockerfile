@@ -78,10 +78,10 @@ LABEL org.opencontainers.image.authors="MariaDB Community" \
       org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.revision="${VCS_REF}" \
       org.opencontainers.image.licenses="GPL-2.0" \
-      org.opencontainers.image.source="https://github.com/Tob1asDocker/rpi-mariadb" \
+      org.opencontainers.image.source="https://github.com/Tob1as/docker-mariadb" \
       org.opencontainers.image.vendor="MariaDB Community" \
       org.opencontainers.image.version="10.6" \
-      org.opencontainers.image.url="https://github.com/Tob1asDocker/rpi-mariadb"
+      org.opencontainers.image.url="https://github.com/Tob1as/docker-mariadb"
 
 # bashbrew-architectures: *
 ENV MARIADB_MAJOR 10.6

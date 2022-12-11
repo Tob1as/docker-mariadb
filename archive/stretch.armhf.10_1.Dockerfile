@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesh
 	org.opencontainers.image.description="Debian 9 Stretch with MariaDB 10.1 on arm arch" \
 	org.opencontainers.image.licenses="GPL-2.0" \
 	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
-	org.opencontainers.image.source="https://github.com/Tob1asDocker/rpi-mariadb"
+	org.opencontainers.image.source="https://github.com/Tob1as/docker-mariadb"
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql

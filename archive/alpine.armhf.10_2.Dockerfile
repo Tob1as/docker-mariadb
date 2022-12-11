@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.authors="Docker Community Authors, Tobias Hargesh
 	org.opencontainers.image.description="AlpineLinux 3.8 with MariaDB 10.2 on arm arch" \
 	org.opencontainers.image.licenses="GPL-2.0" \
 	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
-	org.opencontainers.image.source="https://github.com/Tob1asDocker/rpi-mariadb"
+	org.opencontainers.image.source="https://github.com/Tob1as/docker-mariadb"
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN mkdir -p /var/lib/mysql && \
