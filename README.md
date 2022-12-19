@@ -28,7 +28,7 @@ The intent is also to maintain high compatibility with MySQL, ensuring a library
   * [Debian](https://hub.docker.com/_/debian)
 * build:
   * with Github Actions
-  * ~~on Docker Hub with Autobuild, for example and more details see in this [repository](https://github.com/Tob1asDocker/dockerhubhooksexample).~~
+  * ~~on Docker Hub with Autobuild, for example and more details see in this [repository](https://github.com/Tob1as/docker-build-example).~~
 
 ### How to use these images:
 
