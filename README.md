@@ -26,13 +26,9 @@ The intent is also to maintain high compatibility with MySQL, ensuring a library
 
 ### About these images:
 * a port of the official [MariaDB](https://hub.docker.com/_/mariadb)-Image ([GitHub](https://github.com/MariaDB/mariadb-docker)).
-* based on official distributions Images: 
-  * [Alpine](https://hub.docker.com/_/alpine)
-  * [Ubuntu](https://hub.docker.com/_/ubuntu)
-  * [Debian](https://hub.docker.com/_/debian)
-* build:
-  * with Github Actions
-  * ~~on Docker Hub with Autobuild, for example and more details see in this [repository](https://github.com/Tob1as/docker-build-example).~~
+* based on official distributions Images ([Alpine](https://hub.docker.com/_/alpine),[Ubuntu](https://hub.docker.com/_/ubuntu),[Debian](https://hub.docker.com/_/debian))
+* and on the package manager of the respective linux distribution ([Alpine](https://pkgs.alpinelinux.org/packages?name=mariadb),[Ubuntu](https://packages.ubuntu.com/search?keywords=mariadb-server),[Debian](https://packages.debian.org/search?searchon=names&keywords=mariadb-server)).
+* build with Github Actions
 
 ### How to use these images:
 
