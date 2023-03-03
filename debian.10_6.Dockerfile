@@ -10,6 +10,7 @@ LABEL org.opencontainers.image.authors="MariaDB Community, Tobias Hargesheimer <
 	org.opencontainers.image.licenses="GPL-2.0" \
 	org.opencontainers.image.created="${BUILD_DATE}" \
 	org.opencontainers.image.revision="${VCS_REF}" \
+	org.opencontainers.image.version="10.6" \
 	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
 	org.opencontainers.image.source="https://github.com/Tob1as/docker-mariadb"
 

@@ -176,12 +176,14 @@ replication()
 		[ $? -gt 128 ] && return 1
 		return 0
        }
+       # reachable in command not found(?)
+       # shellcheck disable=SC2317
        return $?
 }
 
 # mariadbupgrade
 #
-# Test the lock on the file /var/lib/mysql_upgrade_info
+# Test the lock on the file $datadir/mysql_upgrade_info
 # https://jira.mariadb.org/browse/MDEV-27068
 mariadbupgrade()
 {
@@ -201,8 +203,8 @@ if [ $# -eq 0 ]; then
 	exit 1
 fi
 
-# Marks the end of mariadb -> mariadb name changes in 10.6+
 #ENDOFSUBSTITUTIONS
+# Marks the end of mysql -> mariadb name changes in 10.6+
 # Global variables used by tests
 declare -A repl
 declare -A def
