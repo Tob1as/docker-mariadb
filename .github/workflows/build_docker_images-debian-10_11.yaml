@@ -1,4 +1,4 @@
-name: 'build docker images: MariaDB 10.6 (Debian)'
+name: 'build docker images: MariaDB 10.11 (Debian)'
 
 on:
   #push:
@@ -6,13 +6,13 @@ on:
   #    - 'main'
   #    - 'master'
   #  paths:
-  #    - 'debian.10_6.Dockerfile'
+  #    - 'debian.10_11.Dockerfile'
   #    - 'docker-entrypoint.sh'
   #    - 'healthcheck.sh'
-  #    - '.github/workflows/build_docker_images-debian-10_6.yaml'
+  #    - '.github/workflows/build_docker_images-debian-10_11.yaml'
   workflow_dispatch:
   schedule:
-    - cron: '30 5 15 * *'  # At 05:30 on day-of-month 15.
+    - cron: '30 5 16 * *'  # At 05:30 on day-of-month 16.
 
 defaults:
   run:
@@ -83,18 +83,19 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: ./debian.10_6.Dockerfile
+          file: ./debian.10_11.Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
           push: true
           build-args: |
             BUILD_DATE=${{steps.script.outputs.build_date}}
             VCS_REF=${{steps.script.outputs.commit_hash}}
           tags: |
-            docker.io/${{steps.script.outputs.docker_repo}}:10.6-debian
-            docker.io/${{steps.script.outputs.docker_repo}}:10.6-debian-${{steps.script.outputs.build_date_numeric}}.${{steps.script.outputs.commit_hash}}
-          #  ghcr.io/${{steps.script.outputs.github_repo}}:10.6-debian-${{steps.script.outputs.build_date_numeric}}.${{steps.script.outputs.commit_hash}}
-          #  ghcr.io/${{steps.script.outputs.github_repo}}:10.6-debian
-          #  quay.io/${{steps.script.outputs.redhat_quay_repo}}:10.6-debian
+            docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian-unstable
+          #  docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian
+          #  docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian-${{steps.script.outputs.build_date_numeric}}.${{steps.script.outputs.commit_hash}}
+          #  ghcr.io/${{steps.script.outputs.github_repo}}:10.11-debian-${{steps.script.outputs.build_date_numeric}}.${{steps.script.outputs.commit_hash}}
+          #  ghcr.io/${{steps.script.outputs.github_repo}}:10.11-debian
+          #  quay.io/${{steps.script.outputs.redhat_quay_repo}}:10.11-debian
 
       - name: Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
