@@ -119,7 +119,7 @@ RUN set -ex; \
 
 VOLUME /var/lib/mysql
 
-COPY healthcheck.sh /usr/local/bin/healthcheck.sh
+COPY healthcheck__10_5.sh /usr/local/bin/healthcheck.sh
 COPY docker-entrypoint__10_5.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/*.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
