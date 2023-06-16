@@ -4,9 +4,7 @@
 -	[`10.6-alpine` (*Dockerfile*)](https://github.com/Tob1as/docker-mariadb/blob/master/alpine.10_6.Dockerfile) (on AlpineLinux [3.17](https://pkgs.alpinelinux.org/package/v3.17/main/armhf/mariadb))
 -	[`10.6-ubuntu` (*Dockerfile*)](https://github.com/Tob1as/docker-mariadb/blob/master/ubuntu.10_6.Dockerfile) (on Ubuntu [22.04 LTS (Jammy)](https://packages.ubuntu.com/search?keywords=mariadb-server))
 -	[`10.11-alpine` (*Dockerfile*)](https://github.com/Tob1as/docker-mariadb/blob/master/alpine.10_11.Dockerfile) (on AlpineLinux [3.18](https://pkgs.alpinelinux.org/package/v3.18/main/armhf/mariadb))
-
-**Unstable:**  
--	[`10.11-debian-unstable` (*Dockerfile*)](https://github.com/Tob1as/docker-mariadb/blob/master/ubuntu.10_11.Dockerfile) (on Debian [12 (bookworm)](https://packages.debian.org/bookworm/mariadb-server))
+-	[`10.11-debian` (*Dockerfile*)](https://github.com/Tob1as/docker-mariadb/blob/master/ubuntu.10_11.Dockerfile) (on Debian [12 (bookworm)](https://packages.debian.org/bookworm/mariadb-server))
   
 *Notes:    
 For amd64 and arm64 it is recommended to use the [official images](https://hub.docker.com/_/mariadb) based on Ubuntu.* 

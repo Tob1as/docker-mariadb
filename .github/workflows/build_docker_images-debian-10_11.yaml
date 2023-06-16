@@ -90,9 +90,8 @@ jobs:
             BUILD_DATE=${{steps.script.outputs.build_date}}
             VCS_REF=${{steps.script.outputs.commit_hash}}
           tags: |
-            docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian-unstable
-          #  docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian
-          #  docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian-${{steps.script.outputs.build_date_numeric}}.${{steps.script.outputs.commit_hash}}
+            docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian
+            docker.io/${{steps.script.outputs.docker_repo}}:10.11-debian-${{steps.script.outputs.build_date_numeric}}.${{steps.script.outputs.commit_hash}}
           #  ghcr.io/${{steps.script.outputs.github_repo}}:10.11-debian-${{steps.script.outputs.build_date_numeric}}.${{steps.script.outputs.commit_hash}}
           #  ghcr.io/${{steps.script.outputs.github_repo}}:10.11-debian
           #  quay.io/${{steps.script.outputs.redhat_quay_repo}}:10.11-debian
