@@ -4,10 +4,9 @@ services:
   mariadb:
     #build:
     #  context: ./
-    #  dockerfile: alpine.10_6.Dockerfile
-    image: tobi312/rpi-mariadb:10.6-alpine
-    #image: tobi312/rpi-mariadb:10.6-ubuntu
-    #image: tobi312/rpi-mariadb:10.6-debian
+    #  dockerfile: alpine.10_11.Dockerfile
+    image: tobi312/rpi-mariadb:10.11-alpine
+    #image: tobi312/rpi-mariadb:10.11-debian
     container_name: mariadb
     restart: unless-stopped
     volumes:
@@ -20,8 +19,10 @@ services:
       MARIADB_USER: example-user
       MARIADB_PASSWORD: my_cool_secret
       MARIADB_MYSQL_LOCALHOST_USER: true  # need for healthcheck.sh
+      #MARIADB_AUTO_UPGRADE: "true"
     ports:
       - 3306:3306
+    #command: mysqld --innodb-buffer-pool-size=256M
     healthcheck:
       #test:  mysqladmin ping -h 127.0.0.1 -u root --password=$$MARIADB_ROOT_PASSWORD || exit 1
       #test:  mysqladmin ping -h 127.0.0.1 -u $$MARIADB_USER --password=$$MARIADB_PASSWORD || exit 1
