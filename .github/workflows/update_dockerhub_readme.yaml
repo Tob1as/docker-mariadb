@@ -32,7 +32,8 @@ jobs:
           GITHUB_REPO=${GITHUB_REPOSITORY,,}
           GITHUB_REPO_SHORT=${GITHUB_REPO#*/}
           GITHUB_REPO_SHORT=${GITHUB_REPO_SHORT#"docker-"}
-          DOCKER_REPO=${{ secrets.DOCKER_USERNAME }}/${GITHUB_REPO_SHORT}
+          #DOCKER_REPO=${{ secrets.DOCKER_USERNAME }}/${GITHUB_REPO_SHORT}
+          DOCKER_REPO=${{ secrets.DOCKER_USERNAME }}/rpi-mariadb
           REDHAT_QUAY_REPO=${{ secrets.REDHAT_QUAY_USERNAME }}/${GITHUB_REPO_SHORT}
           
           # Set output parameters to action.
