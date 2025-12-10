@@ -10,8 +10,8 @@
 # the --replication option. This allows a different set of replication checks
 # on different connections.
 #
-# --su{=|-mariadb} is option to run the healthcheck as a different unix user.
-# Useful if mariadb@localhost user exists with unix socket authentication
+# --su{=|-mysql} is option to run the healthcheck as a different unix user.
+# Useful if mysql@localhost user exists with unix socket authentication
 # Using this option disregards previous options set, so should usually be the
 # first option.
 #
@@ -22,6 +22,7 @@
 # innodb_initialized        USAGE
 # innodb_buffer_pool_loaded USAGE
 # galera_online             USAGE
+# galera_ready              USAGE
 # replication               REPLICATION_CLIENT (<10.5)or REPLICA MONITOR (10.5+)
 # mariadbupgrade            none, however unix user permissions on datadir
 #
@@ -31,7 +32,7 @@
 # different from elsewhere.
 #
 # Note * though denied error message will result in error log without
-#      any permissions.
+#      any permissions. USAGE recommend to avoid this.
 
 set -eo pipefail
 
@@ -41,6 +42,7 @@ _process_sql()
 		${def['file']:+--defaults-file=${def['file']}} \
 		${def['extra_file']:+--defaults-extra-file=${def['extra_file']}} \
 		${def['group_suffix']:+--defaults-group-suffix=${def['group_suffix']}} \
+		--protocol socket \
 		-B "$@"
 }
 
@@ -54,20 +56,49 @@ _process_sql()
 # isn't tested.
 connect()
 {
-	set +e +o pipefail
-	mariadb ${nodefaults:+--no-defaults} \
+	local s
+	# short cut mechanism, to work with --require-secure-transport
+	s=$(_process_sql --skip-column-names -e 'select @@skip_networking')
+	case "$s" in
+		0|1)
+			connect_s=$s
+			return "$s";
+			;;
+	esac
+	# falling back to tcp if there wasn't a connection answer.
+	s=$(mariadb ${nodefaults:+--no-defaults} \
 		${def['file']:+--defaults-file=${def['file']}} \
 		${def['extra_file']:+--defaults-extra-file=${def['extra_file']}}  \
 		${def['group_suffix']:+--defaults-group-suffix=${def['group_suffix']}}  \
-		-h localhost --protocol tcp -e 'select 1' 2>&1 \
-		| grep -qF "Can't connect"
-	local ret=${PIPESTATUS[1]}
-	set -eo pipefail
-	if (( "$ret" == 0 )); then
-		# grep Matched "Can't connect" so we fail
-		return 1
-	fi
-	return 0
+		-h localhost --protocol tcp \
+		--skip-column-names --batch --skip-print-query-on-error \
+		-e 'select @@skip_networking' 2>&1)
+
+	case "$s" in
+		1)      # skip-networking=1 (no network)
+			;&
+		ERROR\ 2002\ \(HY000\):*)
+			# cannot connect
+			connect_s=1
+			;;
+		0)      # skip-networking=0
+			;&
+		ERROR\ 1820\ \(HY000\)*) # password expire
+			;&
+		ERROR\ 4151\ \(HY000\):*) # account locked
+			;&
+		ERROR\ 1226\ \(42000\)*) # resource limit exceeded
+			;&
+		ERROR\ 1[0-9][0-9][0-9]\ \(28000\):*)
+			# grep access denied and other 28000 client errors - we did connect
+			connect_s=0
+			;;
+		*)
+			>&2 echo "Unknown error $s"
+			connect_s=1
+			;;
+	esac
+	return $connect_s
 }
 
 # INNODB_INITIALIZED
@@ -80,7 +111,7 @@ connect()
 innodb_initialized()
 {
 	local s
-	s=$(_process_sql --skip-column-names -e 'select 1 from information_schema.ENGINES WHERE engine="innodb" AND support in ("YES", "DEFAULT", "ENABLED")')
+	s=$(_process_sql --skip-column-names -e "select 1 from information_schema.ENGINES WHERE engine='innodb' AND support in ('YES', 'DEFAULT', 'ENABLED')")
 	[ "$s" == 1 ]
 }
 
@@ -92,7 +123,7 @@ innodb_initialized()
 innodb_buffer_pool_loaded()
 {
 	local s
-	s=$(_process_sql --skip-column-names -e 'select VARIABLE_VALUE from information_schema.GLOBAL_STATUS WHERE VARIABLE_NAME="Innodb_buffer_pool_load_status"')
+	s=$(_process_sql --skip-column-names -e "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS WHERE VARIABLE_NAME='Innodb_buffer_pool_load_status'")
 	if [[ $s =~ 'load completed' ]]; then
 		return 0
 	fi
@@ -105,10 +136,23 @@ innodb_buffer_pool_loaded()
 galera_online()
 {
 	local s
-	s=$(_process_sql --skip-column-names -e 'select VARIABLE_VALUE from information_schema.GLOBAL_STATUS WHERE VARIABLE_NAME="WSREP_LOCAL_STATE"')
+	s=$(_process_sql --skip-column-names -e "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS WHERE VARIABLE_NAME='WSREP_LOCAL_STATE'")
 	# 4 from https://galeracluster.com/library/documentation/node-states.html#node-state-changes
 	# not https://xkcd.com/221/
 	if [[ $s -eq 4 ]]; then
+		return 0
+	fi
+	return 1
+}
+
+# GALERA_READY
+#
+# Tests that the Galera provider is ready.
+galera_ready()
+{
+	local s
+	s=$(_process_sql --skip-column-names -e "select VARIABLE_VALUE from information_schema.GLOBAL_STATUS WHERE VARIABLE_NAME='WSREP_READY'")
+	if [ "$s" = "ON" ]; then
 		return 0
 	fi
 	return 1
@@ -129,7 +173,7 @@ replication()
 	# SHOW REPLICA available 10.5+
 	# https://github.com/koalaman/shellcheck/issues/2383
 	# shellcheck disable=SC2016,SC2026
-	_process_sql -e "show ${repl['all']:+all} slave${repl['all']:+s} ${repl['name']:+'${repl['name']}'} status\G" | \
+	_process_sql -e "SHOW ${repl['all']:+all} REPLICA${repl['all']:+S} ${repl['name']:+'${repl['name']}'} STATUS\G" | \
 		{
 		# required for trim of leading space.
 		shopt -s extglob
@@ -209,7 +253,11 @@ fi
 declare -A repl
 declare -A def
 nodefaults=
+connect_s=
 datadir=/var/lib/mysql
+if [ -f $datadir/.my-healthcheck.cnf ]; then
+	def['extra_file']=$datadir/.my-healthcheck.cnf
+fi
 
 _repl_param_check()
 {
@@ -290,7 +338,7 @@ while [ $# -gt 0 ]; do
 			datadir=${1}
 			;;
 		--no-defaults)
-			unset def
+			def=()
 			nodefaults=1
 			;;
 		--defaults-file=*|--defaults-extra-file=*|--defaults-group-suffix=*)
@@ -313,6 +361,11 @@ while [ $# -gt 0 ]; do
 			fi
 			nodefaults=
 			;;
+		--no-connect)
+			# used for /docker-entrypoint-initdb.d scripts
+			# where you definately don't want a connection test
+			connect_s=0
+			;;
 		--*)
 			test=${1#--}
 			;;
@@ -332,3 +385,9 @@ while [ $# -gt 0 ]; do
 	fi
 	shift
 done
+if [ "$connect_s" != "0" ]; then
+	# we didn't pass a connnect test, so the current success status is suspicious
+	# return what connect thinks.
+	connect
+	exit $?
+fi

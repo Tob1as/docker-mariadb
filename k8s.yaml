@@ -90,8 +90,9 @@ spec:
     spec:
       containers:
         - name: mariadb
-          #image: mariadb:10.6
-          image: tobi312/rpi-mariadb:10.6-alpine
+          #image: mariadb:10.11
+          image: tobi312/rpi-mariadb:10.11-alpine
+          #image: tobi312/rpi-mariadb:10.11-debian
           imagePullPolicy: Always
           envFrom:
           - configMapRef:

@@ -3,31 +3,16 @@ FROM debian:bookworm-slim
 ARG BUILD_DATE
 ARG VCS_REF
 
-# OCI annotations to image
-LABEL org.opencontainers.image.authors="MariaDB Community, Tobias Hargesheimer <docker@ison.ws>" \
-	org.opencontainers.image.title="MariaDB Database" \
-	org.opencontainers.image.description="MariaDB Database for relational SQL" \
-	org.opencontainers.image.licenses="GPL-2.0" \
-	org.opencontainers.image.created="${BUILD_DATE}" \
-	org.opencontainers.image.revision="${VCS_REF}" \
-	org.opencontainers.image.version="10.11" \
-	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
-	org.opencontainers.image.source="https://github.com/Tob1as/docker-mariadb"
-
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
-RUN groupadd -r mysql && useradd -r -g mysql mysql
+RUN groupadd -r mysql && useradd -r -g mysql mysql --home-dir /var/lib/mysql
 
 # add gosu for easy step-down from root
 # https://github.com/tianon/gosu/releases
 # gosu key is B42F6819007F00F88E364FD4036A9C25BF357DD4
-ENV GOSU_VERSION 1.14
+ENV GOSU_VERSION=1.19
 
-ARG GPG_KEYS=177F4010FE56CA3336300305F1656F24C74CD1D8
-# pub   rsa4096 2016-03-30 [SC]
-#         177F 4010 FE56 CA33 3630  0305 F165 6F24 C74C D1D8
-# uid           [ unknown] MariaDB Signing Key <signing-key@mariadb.org>
-# sub   rsa4096 2016-03-30 [E]
 # install "libjemalloc2" as it offers better performance in some cases. Use with LD_PRELOAD
+# install "libtcmalloc-minimal4" as it may improve performance and fix memory fragmentation issues. Use with LD_PRELOAD
 # install "pwgen" for randomizing passwords
 # install "tzdata" for /usr/share/zoneinfo/
 # install "xz-utils" for .sql.xz docker-entrypoint-initdb.d files
@@ -40,10 +25,12 @@ RUN set -eux; \
 		gpg \
 		gpgv \
 		libjemalloc2 \
+		libtcmalloc-minimal4 \
 		pwgen \
 		tzdata \
 		xz-utils \
 		zstd ; \
+    # save list of currently installed packages for later so we can clean up
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get install -y --no-install-recommends \
 		dirmngr \
@@ -53,23 +40,19 @@ RUN set -eux; \
 	dpkgArch="$(dpkg --print-architecture | awk -F- '{ print $NF }')"; \
 	wget -q -O /usr/local/bin/gosu "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch"; \
 	wget -q -O /usr/local/bin/gosu.asc "https://github.com/tianon/gosu/releases/download/$GOSU_VERSION/gosu-$dpkgArch.asc"; \
+	# verify the signature
 	GNUPGHOME="$(mktemp -d)"; \
 	export GNUPGHOME; \
 	gpg --batch --keyserver hkps://keys.openpgp.org --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
-	for key in $GPG_KEYS; do \
-		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-	done; \
-	gpg --batch --export "$GPG_KEYS" > /etc/apt/trusted.gpg.d/mariadb.gpg; \
-	if command -v gpgconf >/dev/null; then \
-		gpgconf --kill all; \
-	fi; \
 	gpg --batch --verify /usr/local/bin/gosu.asc /usr/local/bin/gosu; \
 	gpgconf --kill all; \
 	rm -rf "$GNUPGHOME" /usr/local/bin/gosu.asc; \
+	# clean up fetch dependencies
 	apt-mark auto '.*' > /dev/null; \
 	[ -z "$savedAptMark" ] ||	apt-mark manual $savedAptMark >/dev/null; \
 	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
 	chmod +x /usr/local/bin/gosu; \
+	# verify that the binary works
 	gosu --version; \
 	gosu nobody true
 
@@ -77,12 +60,24 @@ RUN mkdir /docker-entrypoint-initdb.d
 
 # Ensure the container exec commands handle range of utf8 characters based of
 # default locales in base image (https://github.com/docker-library/docs/blob/135b79cc8093ab02e55debb61fdb079ab2dbce87/ubuntu/README.md#locales)
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
+
+# OCI annotations to image
+LABEL org.opencontainers.image.authors="MariaDB Community, Tobias Hargesheimer <docker@ison.ws>" \
+	org.opencontainers.image.title="MariaDB Database" \
+	org.opencontainers.image.description="MariaDB Database for relational SQL" \
+	org.opencontainers.image.licenses="GPL-2.0" \
+	org.opencontainers.image.created="${BUILD_DATE}" \
+	org.opencontainers.image.revision="${VCS_REF}" \
+	org.opencontainers.image.version="10.11" \
+	org.opencontainers.image.url="https://hub.docker.com/r/tobi312/rpi-mariadb" \
+	org.opencontainers.image.source="https://github.com/Tob1as/docker-mariadb"
 
 # bashbrew-architectures: *
-ENV MARIADB_MAJOR 10.11
-ENV MARIADB_VERSION 1:10.11.*
+ENV MARIADB_MAJOR=10.11
+ENV MARIADB_VERSION=1:10.11.*
 # release-status:Stable
+# release-support-type:Long Term Support
 # (https://downloads.mariadb.org/rest-api/mariadb/)
 
 # the "/var/lib/mysql" stuff here is because the mysql-server postinst doesn't have an explicit way to disable the mysql_install_db codepath besides having a database already "configured" (ie, stuff in /var/lib/mysql/mysql)
@@ -90,21 +85,22 @@ ENV MARIADB_VERSION 1:10.11.*
 # hadolint ignore=DL3015
 RUN set -ex; \
 	{ \
-		echo "mariadb-server-$MARIADB_MAJOR" mysql-server/root_password password 'unused'; \
-		echo "mariadb-server-$MARIADB_MAJOR" mysql-server/root_password_again password 'unused'; \
+		echo "mariadb-server" mysql-server/root_password password 'unused'; \
+		echo "mariadb-server" mysql-server/root_password_again password 'unused'; \
 	} | debconf-set-selections; \
 	apt-get update; \
+# postinst script creates a datadir, so avoid creating it by faking its existance.
+	mkdir -p /var/lib/mysql/mysql ; touch /var/lib/mysql/mysql/user.frm ; \
 # mariadb-backup is installed at the same time so that `mysql-common` is only installed once from just mariadb repos
-	apt-get install -y \
-		"mariadb-server=$MARIADB_VERSION" mariadb-backup socat \
+	apt-get install -y --no-install-recommends mariadb-server="$MARIADB_VERSION" mariadb-backup socat \
 	; \
 	rm -rf /var/lib/apt/lists/*; \
 # purge and re-create /var/lib/mysql with appropriate ownership
-	rm -rf /var/lib/mysql; \
-	mkdir -p /var/lib/mysql /var/run/mysqld; \
-	chown -R mysql:mysql /var/lib/mysql /var/run/mysqld; \
-# ensure that /var/run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
-	chmod 777 /var/run/mysqld; \
+	rm -rf /var/lib/mysql /etc/mysql/mariadb.conf.d/50-mysqld_safe.cnf; \
+	mkdir -p /var/lib/mysql /run/mysqld; \
+	chown -R mysql:mysql /var/lib/mysql /run/mysqld; \
+# ensure that /run/mysqld (used for socket and lock files) is writable regardless of the UID our mysqld instance ends up having at runtime
+	chmod 1777 /run/mysqld; \
 # comment out a few problematic configuration values
 	find /etc/mysql/ -name '*.cnf' -print0 \
 		| xargs -0 grep -lZE '^(bind-address|log|user\s)' \
@@ -117,10 +113,11 @@ RUN set -ex; \
 		sed -i -e '/includedir/ {N;s/\(.*\)\n\(.*\)/\n\2\n\1/}' /etc/mysql/mariadb.cnf; \
 	fi
 
+
 VOLUME /var/lib/mysql
 
-COPY healthcheck.sh /usr/local/bin/healthcheck.sh
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY healthcheck.10_11.sh /usr/local/bin/healthcheck.sh
+COPY docker-entrypoint.10_11.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/*.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
