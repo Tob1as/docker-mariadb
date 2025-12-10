@@ -7,8 +7,8 @@ on:
   #    - 'master'
   #  paths:
   #    - 'debian.10_11.Dockerfile'
-  #    - 'docker-entrypoint.sh'
-  #    - 'healthcheck.sh'
+  #    - 'docker-entrypoint.10_11.sh'
+  #    - 'healthcheck.10_11.sh'
   #    - '.github/workflows/build_docker_images-debian-10_11.yaml'
   workflow_dispatch:
   schedule:

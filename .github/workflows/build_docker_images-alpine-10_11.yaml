@@ -7,8 +7,8 @@ on:
   #    - 'master'
   #  paths:
   #    - 'alpine.10_11.Dockerfile'
-  #    - 'docker-entrypoint.sh'
-  #    - 'healthcheck.sh'
+  #    - 'docker-entrypoint.10_11.sh'
+  #    - 'healthcheck.10_11.sh'
   #    - '.github/workflows/build_docker_images-alpine-10_11.yaml'
   workflow_dispatch:
   schedule:
@@ -83,7 +83,7 @@ jobs:
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
-          file: ./alpine.10_5.Dockerfile
+          file: ./alpine.10_11.Dockerfile
           platforms: linux/amd64,linux/arm64/v8,linux/arm/v7,linux/arm/v6
           push: true
           build-args: |
