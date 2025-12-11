@@ -12,7 +12,7 @@ RUN groupadd -r mysql && useradd -r -g mysql mysql --home-dir /var/lib/mysql
 ENV GOSU_VERSION=1.19
 
 # install "libjemalloc2" as it offers better performance in some cases. Use with LD_PRELOAD
-# install "libtcmalloc-minimal4" as it may improve performance and fix memory fragmentation issues. Use with LD_PRELOAD
+# install "libtcmalloc-minimal4" as it may improve performance and fix memory fragmentation issues. Use with LD_PRELOAD # -> replace with libtcmalloc-minimal4t64 ?
 # install "pwgen" for randomizing passwords
 # install "tzdata" for /usr/share/zoneinfo/
 # install "xz-utils" for .sql.xz docker-entrypoint-initdb.d files
@@ -25,7 +25,8 @@ RUN set -eux; \
 		gpg \
 		gpgv \
 		libjemalloc2 \
-		libtcmalloc-minimal4 \
+		#libtcmalloc-minimal4 \
+		libtcmalloc-minimal4t64 \
 		pwgen \
 		tzdata \
 		xz-utils \
